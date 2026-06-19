@@ -1,4 +1,5 @@
-# Instant Translator
+# <img width="32" height="32" alt="instantranslate_icon" src="https://github.com/user-attachments/assets/fb8fcc88-0d9e-4cae-92a7-ad139fba5130" /> Instant Translator
+
 
 > System-wide instant text translator for Windows. Select text → Ctrl+C → Ctrl+C → translation.
 
