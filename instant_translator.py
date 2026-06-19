@@ -15,6 +15,7 @@ import threading
 import time
 import tkinter as tk
 from tkinter import font as tkfont
+from pathlib import Path
 import urllib.parse
 import urllib.request
 
@@ -52,6 +53,13 @@ class InstantTranslator:
         self.root = tk.Tk()
         self.root.withdraw()
         self.root.title("InstantTranslator")
+
+        # иконка приложения
+        icon_path = Path(__file__).parent / "instantranslate_icon_256.png"
+        if icon_path.is_file():
+            icon = tk.PhotoImage(file=str(icon_path))
+            self.root.iconphoto(True, icon)
+            self._app_icon = icon  # keep ref to prevent GC
 
         self.last_press_time: float = 0.0
         self.prev_c_down: bool = False
