@@ -9,19 +9,22 @@ Instant Translator — system-wide translation utility.
 
 import ctypes
 import json
+import re
 import sys
 import threading
 import time
 import tkinter as tk
+from tkinter import font as tkfont
 import urllib.parse
 import urllib.request
 
 # ─── Configuration ───────────────────────────────────────────────────────────
 DOUBLE_PRESS_MS = 500           # Окно для двойного нажатия Ctrl+C (мс)
 POLL_INTERVAL = 0.025           # 25ms — частота опроса клавиш
-OVERLAY_AUTO_CLOSE_MS = 3000    # Авто-закрытие через N мс (если курсор не на оверлее)
+OVERLAY_AUTO_CLOSE_MS = 1000    # Авто-закрытие через N мс (если курсор не на оверлее)
 OVERLAY_MAX_CHARS = 3000        # Макс. длина текста для перевода
-OVERLAY_ALPHA = 0.82            # 18% прозрачности
+OVERLAY_MAX_WIDTH_CHARS = 60   # Макс. ширина оверлея в символах (перенос строки)
+OVERLAY_ALPHA = 0.94            # 6% прозрачности
 BG_COLOR = "#FFFFF5"            # фон окна (максимально нейтральный, почти невидим при alpha)
 TEXT_COLOR = "#333333"
 HL_COLOR = "#FFFFE0"            # цвет «выделения» перевода (жёлтый маркер)
@@ -95,8 +98,9 @@ class InstantTranslator:
         text = self._get_clipboard_text()
         if not text:
             return
-        text = text.strip()[:OVERLAY_MAX_CHARS]
-        if not text or text.isspace():
+        # нормализация пробелов: \n, \r, \t, серии пробелов → один пробел
+        text = re.sub(r'\s+', ' ', text).strip()[:OVERLAY_MAX_CHARS]
+        if not text:
             return
 
         self._show_loading()
@@ -296,6 +300,10 @@ class InstantTranslator:
         """
         overlay = self._create_overlay_window()
 
+        # измеряем ширину для переноса
+        font = tkfont.Font(family="Segoe UI", size=12)
+        wraplength = font.measure("0" * OVERLAY_MAX_WIDTH_CHARS)
+
         label = tk.Label(
             overlay,
             text=translation,
@@ -303,6 +311,8 @@ class InstantTranslator:
             bg=HL_COLOR,            # жёлтый фон впритык под буквами
             fg=TEXT_COLOR,
             padx=0, pady=0,
+            wraplength=wraplength,
+            justify="left",
             cursor="xterm",
         )
         label.pack()
