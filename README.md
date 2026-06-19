@@ -45,8 +45,8 @@ This is intentional — the utility is designed for fast bidirectional translati
 ## Installation / Установка
 
 ```bash
-git clone https://github.com/YOUR_USER/instant-translator.git
-cd instant-translator
+git clone https://github.com/vitaliso/instantranslate.git
+cd instantranslate
 python instant_translator.py
 ```
 
