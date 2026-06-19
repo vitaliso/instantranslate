@@ -4,6 +4,9 @@
 
 Системная утилита для моментального перевода текста в любой Windows-программе.
 
+<img width="947" height="372" alt="изображение" src="https://github.com/user-attachments/assets/ef14627a-fb79-4340-821d-ff5a8151d546" />
+
+
 ## How it works / Как работает
 
 1. **Select text** in any app (browser, IDE, terminal, PDF, games)  
