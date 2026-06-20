@@ -22,7 +22,6 @@ import urllib.request
 # ─── Configuration ───────────────────────────────────────────────────────────
 DOUBLE_PRESS_MS = 500           # Окно для двойного нажатия Ctrl+C (мс)
 POLL_INTERVAL = 0.025           # 25ms — частота опроса клавиш
-OVERLAY_AUTO_CLOSE_MS = 1000    # Авто-закрытие через N мс (если курсор не на оверлее)
 OVERLAY_MAX_CHARS = 3000        # Макс. длина текста для перевода
 OVERLAY_MAX_WIDTH_CHARS = 60   # Макс. ширина оверлея в символах (перенос строки)
 OVERLAY_ALPHA = 0.94            # 6% прозрачности
@@ -66,7 +65,8 @@ class InstantTranslator:
         self.running = True
         self.overlay: tk.Toplevel | None = None
         self.overlay_active: bool = False
-        self.close_timer: str | None = None
+        self._mouse_idle_pos: tuple[int, int] | None = None
+        self._mouse_monitor_id: str | None = None
 
         # поток опроса клавиш
         self.monitor = threading.Thread(target=self._poll_keys, daemon=True)
@@ -197,52 +197,9 @@ class InstantTranslator:
         overlay.configure(bg=BG_COLOR)
         overlay.bind("<Escape>", lambda e: self._close_overlay())
 
-        # отслеживание мыши для автозакрытия
-        overlay.bind("<Enter>", self._on_mouse_enter)
-        overlay.bind("<Leave>", self._on_mouse_leave)
-
         self.overlay = overlay
         self.overlay_active = True
         return overlay
-
-    def _setup_close_timer(self, delay_ms: int = OVERLAY_AUTO_CLOSE_MS) -> None:
-        """Запускает таймер закрытия оверлея."""
-        self._cancel_close_timer()
-        self.close_timer = self.overlay.after(delay_ms, self._close_overlay)
-
-    def _cancel_close_timer(self) -> None:
-        """Отменяет таймер закрытия."""
-        if self.close_timer:
-            try:
-                self.overlay.after_cancel(self.close_timer)
-            except tk.TclError:
-                pass
-            self.close_timer = None
-
-    def _on_mouse_enter(self, _event=None) -> None:
-        """Курсор зашёл на оверлей — отменяем таймер."""
-        self._cancel_close_timer()
-
-    def _on_mouse_leave(self, _event=None) -> None:
-        """Курсор покинул оверлей — через 50ms проверяем, правда ли ушёл."""
-        self.overlay.after(50, self._check_mouse_position)
-
-    def _check_mouse_position(self) -> None:
-        """Проверяет, действительно ли мышь за пределами оверлея (по bbox)."""
-        if not self.overlay:
-            return
-        try:
-            mx = self.overlay.winfo_pointerx()
-            my = self.overlay.winfo_pointery()
-            ox = self.overlay.winfo_rootx()
-            oy = self.overlay.winfo_rooty()
-            ow = self.overlay.winfo_width()
-            oh = self.overlay.winfo_height()
-            if ox <= mx <= ox + ow and oy <= my <= oy + oh:
-                return
-            self._setup_close_timer()
-        except tk.TclError:
-            pass
 
     def _position_above_cursor(self) -> None:
         """Размещает оверлей НАД курсором на ЛЮБОМ мониторе (virtual desktop)."""
@@ -268,16 +225,40 @@ class InstantTranslator:
 
         self.overlay.geometry(f"+{int(x)}+{int(y)}")
 
+    def _start_mouse_monitor(self) -> None:
+        """Проверяет позицию мыши каждые 200мс. Если курсор сдвинулся — закрывает оверлей."""
+        if not self.overlay_active or not self.overlay:
+            self._mouse_idle_pos = None
+            self._mouse_monitor_id = None
+            return
+        try:
+            mx = self.overlay.winfo_pointerx()
+            my = self.overlay.winfo_pointery()
+            if self._mouse_idle_pos is None:
+                self._mouse_idle_pos = (mx, my)
+            else:
+                prev_x, prev_y = self._mouse_idle_pos
+                if abs(mx - prev_x) > 3 or abs(my - prev_y) > 3:
+                    self._close_overlay()
+                    return
+            self._mouse_monitor_id = self.overlay.after(200, self._start_mouse_monitor)
+        except tk.TclError:
+            self._mouse_idle_pos = None
+            self._mouse_monitor_id = None
+
     def _close_overlay(self, _event=None) -> None:
         """Закрывает оверлей и сбрасывает флаги."""
         if self.overlay:
             try:
-                self._cancel_close_timer()
+                if self._mouse_monitor_id:
+                    self.overlay.after_cancel(self._mouse_monitor_id)
                 self.overlay.destroy()
             except tk.TclError:
                 pass
             self.overlay = None
             self.overlay_active = False
+            self._mouse_idle_pos = None
+            self._mouse_monitor_id = None
 
     # ── Overlay: загрузка ────────────────────────────────────────────────────
 
@@ -297,7 +278,7 @@ class InstantTranslator:
         self._position_above_cursor()
         overlay.deiconify()
         overlay.lift()
-        self._setup_close_timer(OVERLAY_AUTO_CLOSE_MS)
+        self._start_mouse_monitor()
 
     # ── Overlay: результат перевода ─────────────────────────────────────────
 
@@ -332,7 +313,7 @@ class InstantTranslator:
         self._position_above_cursor()
         overlay.deiconify()
         overlay.lift()
-        self._setup_close_timer(OVERLAY_AUTO_CLOSE_MS)
+        self._start_mouse_monitor()
 
     # ── Overlay: ошибка ──────────────────────────────────────────────────────
 
@@ -352,7 +333,7 @@ class InstantTranslator:
         self._position_above_cursor()
         overlay.deiconify()
         overlay.lift()
-        self._setup_close_timer(4000)
+        self._start_mouse_monitor()
 
     # ── Quit hotkey ──────────────────────────────────────────────────────────
 

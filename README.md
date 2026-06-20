@@ -17,8 +17,8 @@
 3. Minimal overlay appears with **only the translation** on a yellow-highlight background. Translation is **auto-copied** to clipboard.  
    Появляется минималистичный оверлей **только с переводом** на жёлтом фоне. Перевод **автоматически копируется** в буфер.
 
-Overlay closes: **Escape** key or after **3 seconds** (timer pauses when mouse hovers over it).  
-Оверлей закрывается: **Escape** или через **3 секунды** (при наведении мыши таймер ставится на паузу).
+Overlay stays open while mouse is **stationary**. Move the cursor → overlay closes. Press **Escape** to close immediately.  
+Оверлей висит, пока мышь **неподвижна**. Шевельнул курсором → закрывается. **Escape** — закрыть сразу.
 
 **Exit / Выход:** `Ctrl+Shift+Q`
 
@@ -84,9 +84,9 @@ Edit the constants at the top of `instant_translator.py`:
 |---|---|---|
 | `DOUBLE_PRESS_MS` | `500` | Max interval between two Ctrl+C presses (ms) |
 | `POLL_INTERVAL` | `0.025` | Keyboard polling interval (seconds) |
-| `OVERLAY_AUTO_CLOSE_MS` | `3000` | Auto-close delay after no mouse activity (ms) |
 | `OVERLAY_MAX_CHARS` | `3000` | Max text length for translation |
-| `OVERLAY_ALPHA` | `0.82` | Window opacity (1.0 = opaque, 0.82 = 18% transparent) |
+| `OVERLAY_MAX_WIDTH_CHARS` | `60` | Max overlay width in characters (wraps long text) |
+| `OVERLAY_ALPHA` | `0.94` | Window opacity (1.0 = opaque, 0.94 = 6% transparent) |
 | `BG_COLOR` | `#FFFFF5` | Window background color |
 | `TEXT_COLOR` | `#333333` | Text color |
 | `HL_COLOR` | `#FFFFE0` | Translation highlight / marker color |
