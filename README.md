@@ -67,12 +67,14 @@ Or just download the files — no `pip install` needed.
 
 ## Autorun / Автозагрузка
 
-Place a shortcut to `run_hidden.vbs` in:  
-Положи ярлык на `run_hidden.vbs` в:
+**Easy way (recommended):** Double-click `install_startup.vbs` in the project folder — it creates the correct startup shortcut automatically.  
+**Простой способ:** дважды кликни `install_startup.vbs` — он сам создаст ярлык в автозагрузке.
 
+Manual way: Run `shell:startup` (Win+R), create a shortcut to:
 ```
-%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\
+pythonw.exe "F:\путь\к\instant_translator.py"
 ```
+Start in: the project folder.
 
 Or create a task in Task Scheduler for more control.
 
@@ -98,6 +100,7 @@ Edit the constants at the top of `instant_translator.py`:
 | `instant_translator.py` | Main script — all logic |
 | `run_hidden.vbs` | Silent VBS launcher (no console) |
 | `run.bat` | Batch launcher (minimized console) |
+| `install_startup.vbs` | One-click autorun installer — run once |
 | `README.md` | This file |
 | `LICENSE` | MIT License |
 
