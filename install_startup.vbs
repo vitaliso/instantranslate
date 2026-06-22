@@ -1,5 +1,5 @@
 ' Install Instant Translator to Windows Startup.
-' Run ONCE вЂ” creates a shortcut in the Startup folder.
+' Run ONCE — creates a shortcut in the Startup folder.
 ' After reboot, translator starts automatically.
 
 Dim shell, fso, startupPath, shortcutPath, scriptDir, pyw
@@ -21,12 +21,12 @@ shortcut.TargetPath = pyw
 shortcut.Arguments = """" & scriptDir & "\instant_translator.py"""
 shortcut.WorkingDirectory = scriptDir
 shortcut.WindowStyle = 7  ' minimized
-shortcut.Description = "Instant Translator вЂ” Ctrl+C+C to translate"
+shortcut.Description = "Instant Translator — Ctrl+C+C to translate"
 shortcut.Save
 
 If fso.FileExists(shortcutPath) Then
-    MsgBox "Р“РѕС‚РѕРІРѕ! РЇСЂР»С‹Рє СЃРѕР·РґР°РЅ РІ Р°РІС‚РѕР·Р°РіСЂСѓР·РєРµ:" & vbCrLf & shortcutPath & vbCrLf & vbCrLf & _
-           "РџРµСЂРµР·Р°РіСЂСѓР·Рё СЃРёСЃС‚РµРјСѓ РёР»Рё Р·Р°РїСѓСЃС‚Рё run_hidden.vbs РІСЂСѓС‡РЅСѓСЋ.", vbInformation, "Instant Translator"
+    MsgBox "Готово! Ярлык создан в автозагрузке:" & vbCrLf & shortcutPath & vbCrLf & vbCrLf & _
+           "Перезагрузи систему или запусти run_hidden.vbs вручную.", vbInformation, "Instant Translator"
 Else
-    MsgBox "РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЏСЂР»С‹Рє РІ " & startupPath, vbExclamation, "Instant Translator"
+    MsgBox "Ошибка: не удалось создать ярлык в " & startupPath, vbExclamation, "Instant Translator"
 End If
